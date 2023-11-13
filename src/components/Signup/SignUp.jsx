@@ -4,39 +4,20 @@ import { FormControl, Stack, TextField, Button } from '@mui/material'
 import Axios from 'axios'
 import './SignUp.css'
 import bcrypt from 'bcryptjs'
-import imageCompressor from 'browser-image-compression'
+
 import Navbar from '../Navbar/Navbar'
 
 const SignUp = () => {
 
     const [newUserData, setNewUserData] = useState({
-        name: '', email: '', phone: '', password: '', userImage: ''
+        name: "", email: "", phone: "", password: ""
     });
     const navigator = useNavigate();
 
-
-    const compressImage = async (img) => {
-        try {
-            console.log("vefore : ", img.size)
-            const compressedFile = await imageCompressor(img, { maxSizeMB: 0.01, maxWidthOrHeight: 800 })
-            console.log("after", compressedFile.size)
-            convertToBase64(compressedFile);
-        } catch (e) {
-            console.log(e);//error
-            alert("image compression failed")
-        }
-    }
+   
 
     var reader;
-    const convertToBase64 = async (abcd) => {
-        // console.log(abcd.size);
-        reader = new FileReader();
-        reader.readAsDataURL(abcd);
-        reader.onload = () => {
-            setNewUserData({ ...newUserData, "userImage": reader.result })
-        }
-
-    }
+    
 
     const handlechange = (e, label) => {
         if (label !== 'password')
@@ -49,7 +30,7 @@ const SignUp = () => {
         return bcrypt.hashSync(pass, '$2a$10$CwTycUXWue0Thq9StjUM0u')
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async (e) => {
 
         var validRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
         var validPhone = /^[+]?(1\-|1\s|1|\d{3}\-|\d{3}\s|)?((\(\d{3}\))|\d{3})(\-|\s)?(\d{3})(\-|\s)?(\d{4})$/g;
@@ -66,9 +47,6 @@ const SignUp = () => {
             return
         } else if (newUserData.password.length < 6) {
             alert("password should be atleast 6 characters")
-            return
-        } else if (newUserData.userImage === '') {
-            alert('please upload ur image')
             return
         }
 
@@ -89,7 +67,20 @@ const SignUp = () => {
 
             }).catch(err => alert(err))
 
+        e.preventDefault();
+        const response = fetch("http://localhost:5000/api/creatuser", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ Name: newUserData.name, Email: newUserData.email, PhoneNumber: newUserData.phone, Password: newUserData.password })
+        })
+        const json = (await response).json()
+        console.log(json);
 
+        if (!json.success) {
+            alert("Enter Valid Credentials")
+        }
 
     }
 
@@ -103,14 +94,9 @@ const SignUp = () => {
                     <Stack direction="column" alignItems="center" spacing={2}>
                         <TextField label="Name" required margin='normal' variant='filled' color='secondary' onChange={e => handlechange(e, "name")}></TextField>
                         <TextField label="Email" required type='email' margin='normal' variant='filled' color='secondary' onChange={e => handlechange(e, "email")}></TextField>
-                        <TextField label="Phone Number" required type='number' margin='normal' variant='filled' color='secondary' onChange={e => handlechange(e, "phone")}></TextField>
+                        <TextField label="PhoneNumber" required type='number' margin='normal' variant='filled' color='secondary' onChange={e => handlechange(e, "phone")}></TextField>
                         <TextField label="Password" required type='password' margin='normal' variant='filled' color='secondary' onChange={e => handlechange(e, "password")}></TextField>
-                        <div>
-                            <Button variant="contained" component="label">
-                                Upload User Image
-                                <input hidden accept="image/*" data-max-size="900000" required type="file" onChange={e => compressImage(e.target.files[0])} />
-                            </Button>
-                        </div>
+                      
                         <Button type='submit' variant="contained" onClick={handleSubmit} component="label"> Submit </Button>
                     </Stack>
                 </FormControl>

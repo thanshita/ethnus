@@ -19,6 +19,7 @@
     display: flex;
     justify-content: center;
     margin-top: 20px;
+    padding-right: 70px;
 }
 
 .search-bar .inp {
@@ -36,6 +37,7 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    
 }
 
 .search-bar .btnn:hover {
@@ -63,6 +65,9 @@
 
 .serviceOne,.serviceTwo,.serviceThree {
     padding: 20px;
+}
+.sub{
+    padding-right: 200px;
 }
 
 
